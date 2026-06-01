@@ -20,14 +20,33 @@ def clone_repository(clone_url: str):
 
     return repo_path
 
+
 def scan_repository(repo_path):
 
     print("\nScanning repository...\n")
 
+    skip_dirs = {
+        ".git",
+        "__pycache__",
+        ".pytest_cache",
+        "venv"
+    }
+
     for root, dirs, files in os.walk(repo_path):
+
+        # Skip specified directories
+        dirs[:] = [d for d in dirs if d not in skip_dirs]
 
         for file in files:
 
             file_path = os.path.join(root, file)
 
-            print(file_path)
+            try:
+
+                with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+                    content = f.read()
+                    
+                    print(f"Scanning: {file_path}")
+
+            except Exception as e:
+                print(f"Could not read {file_path}: {e}")    

@@ -1,0 +1,6 @@
+SECRET_PATTERNS = [
+    "API_KEY",
+    "PASSWORD",
+    "AWS_SECRET",
+    "SECRET_KEY"
+]
