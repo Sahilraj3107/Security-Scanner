@@ -71,7 +71,10 @@ async def github_webhook(request: Request):
 
         print("\nStarting repository clone...")
 
-        repo_path = clone_repository(clone_url)
+        repo_path = clone_repository(
+                        clone_url,
+                        head_ref
+                    )
 
         print(f"Local Path: {repo_path}")
 
