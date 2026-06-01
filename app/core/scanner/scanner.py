@@ -2,14 +2,14 @@ import shutil
 import subprocess
 from pathlib import Path
 import os
+from datetime import datetime
+
 
 def clone_repository(clone_url: str):
 
-    repo_path = Path("temp_repo")
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    # Remove old clone if it exists
-    if repo_path.exists():
-        shutil.rmtree(repo_path)
+    repo_path = Path(f"temp_repo_{timestamp}")
 
     subprocess.run(
         ["git", "clone", clone_url, str(repo_path)],
