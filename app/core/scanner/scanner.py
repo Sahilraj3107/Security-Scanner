@@ -3,7 +3,7 @@ import subprocess
 from pathlib import Path
 import os
 from datetime import datetime
-
+from app.core.scanner.secrets import SECRET_PATTERNS
 
 def clone_repository(clone_url: str):
 
@@ -45,6 +45,12 @@ def scan_repository(repo_path):
 
                 with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
                     content = f.read()
+                    for pattern in SECRET_PATTERNS:
+                        if pattern in content:
+
+                            print("\n[HIGH]")
+                            print(f"File: {file_path}")
+                            print(f"Pattern: {pattern}")
                     
                     print(f"Scanning: {file_path}")
 
