@@ -28,6 +28,8 @@
 #Just a test script (Check whether it create pr or not?)
 from fastapi import APIRouter, Request
 
+from app.core.scanner.scanner import clone_repository
+
 router = APIRouter()
 
 
@@ -60,6 +62,15 @@ async def github_webhook(request: Request):
     print(f"PR Number: {pr_number}")
     print(f"Branch: {head_ref}")
     print(f"Head SHA: {head_sha}")
+
+    # Clone repository only for relevant PR actions
+    if action in ["opened", "synchronize", "reopened"]:
+
+        print("\nStarting repository clone...")
+
+        repo_path = clone_repository(clone_url)
+
+        print(f"Local Path: {repo_path}")
 
     print("=" * 50 + "\n")
 
