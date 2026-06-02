@@ -4,6 +4,7 @@ from pathlib import Path
 from datetime import datetime
 
 from app.core.scanner.secrets import SECRET_PATTERNS
+from app.core.scanner.findings import Finding
 
 
 def clone_repository(clone_url: str, branch_name: str):
@@ -35,6 +36,8 @@ def scan_repository(repo_path):
 
     print("\nScanning repository...\n")
 
+    findings = []
+
     skip_dirs = {
         ".git",
         "__pycache__",
@@ -60,18 +63,36 @@ def scan_repository(repo_path):
                     errors="ignore"
                 ) as f:
 
-                    content = f.read()
+                    lines = f.readlines()
 
-                    print(f"Scanning: {file_path}")
+                print(f"Scanning: {file_path}")
 
-                    for pattern in SECRET_PATTERNS:
+                for line_number, line in enumerate(lines, start=1):
 
-                        if pattern in content:
+                    for secret_name, regex_pattern in SECRET_PATTERNS.items():
+
+                        if regex_pattern.search(line):
+
+                            finding = Finding(
+                                type="SECRET",
+                                severity="HIGH",
+                                file=file_path,
+                                line=line_number,
+                                message=f"Hardcoded {secret_name} detected"
+                            )
+
+                            findings.append(finding)
 
                             print("\n[HIGH]")
                             print(f"File: {file_path}")
-                            print(f"Pattern: {pattern}")
+                            print(f"Line: {line_number}")
+                            print(f"Pattern: {secret_name}")
 
             except Exception as e:
 
                 print(f"Could not read {file_path}: {e}")
+
+    print("\nScan Complete")
+    print(f"Findings Found: {len(findings)}")
+
+    return findings

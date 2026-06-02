@@ -6,3 +6,5 @@ class Finding(BaseModel):
     file: str
     line: int
     message: str
+
+
