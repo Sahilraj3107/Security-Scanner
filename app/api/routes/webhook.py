@@ -1,31 +1,3 @@
-# from fastapi import APIRouter, Request
-
-# router = APIRouter()
-
-
-# @router.post("/webhook/github")
-# async def github_webhook(request: Request):
-
-#     payload = await request.json()
-
-#     action = payload.get("action")
-
-#     pr = payload.get("pull_request", {})
-
-#     repo = payload.get("repository", {})
-
-#     print("\n" + "=" * 50)
-#     print("GitHub PR Event Received")
-#     print("=" * 50)
-
-#     print("Action:", action)
-#     print("PR Number:", pr.get("number"))
-#     print("PR Title:", pr.get("title"))
-#     print("Repository:", repo.get("full_name"))
-
-#     return {"status": "received"}
-
-#Just a test script (Check whether it create pr or not?)
 from fastapi import APIRouter, Request
 
 from app.core.scanner.scanner import (
@@ -78,7 +50,10 @@ async def github_webhook(request: Request):
 
         print(f"Local Path: {repo_path}")
 
-        scan_repository(repo_path)
+        findings = scan_repository(repo_path)
+        print("\nReturned Findings\n")
+        for finding in findings:
+            print(finding)
 
     print("=" * 50 + "\n")
 
