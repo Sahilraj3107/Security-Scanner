@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Request
+from app.core.scanner.report import generate_report
 
 from app.core.scanner.scanner import (
     clone_repository,
@@ -51,9 +52,9 @@ async def github_webhook(request: Request):
         print(f"Local Path: {repo_path}")
 
         findings = scan_repository(repo_path)
-        print("\nReturned Findings\n")
-        for finding in findings:
-            print(finding)
+        report = generate_report(findings)
+        print("\nScan Report:\n") 
+        print(report)
 
     print("=" * 50 + "\n")
 
