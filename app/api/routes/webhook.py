@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Request
 from app.core.scanner.report import generate_report
-
+from app.core.github.comments import post_pr_comment
 from app.core.scanner.scanner import (
     clone_repository,
     scan_repository
@@ -54,7 +54,16 @@ async def github_webhook(request: Request):
         findings = scan_repository(repo_path)
         report = generate_report(findings)
         print("\nScan Report:\n") 
+        
         print(report)
+
+        print("\nPosting comment to GitHub...\n")
+
+        post_pr_comment(
+            repo_name=repo_name,
+            pr_number=pr_number,
+            report=report
+            )
 
     print("=" * 50 + "\n")
 
