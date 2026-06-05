@@ -50,7 +50,7 @@ async def github_webhook(request: Request):
 
         try:
 
-            # Status: Pending
+            # Set status to pending
             create_status_check(
                 repo_name=repo_name,
                 commit_sha=head_sha,
@@ -82,7 +82,7 @@ async def github_webhook(request: Request):
                 report=report
             )
 
-            # Status: Success / Failure
+            # Update status based on findings
             if findings:
 
                 create_status_check(
@@ -105,18 +105,28 @@ async def github_webhook(request: Request):
 
             print(f"\nScanner Error: {e}")
 
-            create_status_check(
-                repo_name=repo_name,
-                commit_sha=head_sha,
-                state="failure",
-                description="Scanner crashed"
-            )
+            try:
+
+                create_status_check(
+                    repo_name=repo_name,
+                    commit_sha=head_sha,
+                    state="failure",
+                    description="Scanner crashed"
+                )
+
+            except Exception as status_error:
+
+                print(
+                    f"Status check failed: "
+                    f"{status_error}"
+                )
 
             raise
 
         finally:
 
             if repo_path:
+
                 cleanup_repository(repo_path)
 
     print("=" * 50 + "\n")

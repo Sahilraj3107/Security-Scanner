@@ -1,6 +1,7 @@
 import os
 import shutil
 import subprocess
+import time
 from pathlib import Path
 from datetime import datetime
 
@@ -46,69 +47,86 @@ def scan_repository(repo_path):
         "venv"
     }
 
-    try:
+    for root, dirs, files in os.walk(repo_path):
 
-        for root, dirs, files in os.walk(repo_path):
+        # Skip unwanted directories
+        dirs[:] = [d for d in dirs if d not in skip_dirs]
 
-            # Skip unwanted directories
-            dirs[:] = [d for d in dirs if d not in skip_dirs]
+        for file in files:
 
-            for file in files:
+            file_path = os.path.join(root, file)
 
-                file_path = os.path.join(root, file)
+            # Convert to repository-relative path
+            relative_path = os.path.relpath(
+                file_path,
+                repo_path
+            )
 
-                # Convert to repository-relative path
-                relative_path = os.path.relpath(
+            try:
+
+                with open(
                     file_path,
-                    repo_path
+                    "r",
+                    encoding="utf-8",
+                    errors="ignore"
+                ) as f:
+
+                    lines = f.readlines()
+
+                print(f"Scanning: {relative_path}")
+
+                for line_number, line in enumerate(lines, start=1):
+
+                    for secret_name, regex_pattern in SECRET_PATTERNS.items():
+
+                        if regex_pattern.search(line):
+
+                            finding = Finding(
+                                type="SECRET",
+                                severity="HIGH",
+                                file=relative_path,
+                                line=line_number,
+                                message=f"Hardcoded {secret_name} detected"
+                            )
+
+                            findings.append(finding)
+
+                            print("\n[HIGH]")
+                            print(f"File: {relative_path}")
+                            print(f"Line: {line_number}")
+                            print(f"Pattern: {secret_name}")
+
+            except Exception as e:
+
+                print(
+                    f"Could not read "
+                    f"{relative_path}: {e}"
                 )
 
-                try:
+    print("\nScan Complete")
+    print(f"Findings Found: {len(findings)}")
 
-                    with open(
-                        file_path,
-                        "r",
-                        encoding="utf-8",
-                        errors="ignore"
-                    ) as f:
+    return findings
 
-                        lines = f.readlines()
 
-                    print(f"Scanning: {relative_path}")
+def cleanup_repository(repo_path):
 
-                    for line_number, line in enumerate(lines, start=1):
+    try:
 
-                        for secret_name, regex_pattern in SECRET_PATTERNS.items():
+        # Give Windows a moment to release file handles
+        time.sleep(2)
 
-                            if regex_pattern.search(line):
-
-                                finding = Finding(
-                                    type="SECRET",
-                                    severity="HIGH",
-                                    file=relative_path,
-                                    line=line_number,
-                                    message=f"Hardcoded {secret_name} detected"
-                                )
-
-                                findings.append(finding)
-
-                                print("\n[HIGH]")
-                                print(f"File: {relative_path}")
-                                print(f"Line: {line_number}")
-                                print(f"Pattern: {secret_name}")
-
-                except Exception as e:
-
-                    print(f"Could not read {relative_path}: {e}")
-
-        print("\nScan Complete")
-        print(f"Findings Found: {len(findings)}")
-
-        return findings
-
-    finally:
-
-        # Cleanup cloned repository
         if os.path.exists(repo_path):
+
             shutil.rmtree(repo_path)
-            print(f"\nDeleted temporary repository: {repo_path}")
+
+            print(
+                f"\nDeleted temporary repository: "
+                f"{repo_path}"
+            )
+
+    except Exception as e:
+
+        print(
+            f"\nCleanup failed: {e}"
+        )
