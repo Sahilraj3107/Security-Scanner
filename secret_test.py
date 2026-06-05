@@ -1,2 +1,2 @@
-API_KEY = "sk-test-1234564"
-PASSWORD = "admin1732"
+API_KEY = "sk-test-12345362"
+PASSWORD = "admin1392"

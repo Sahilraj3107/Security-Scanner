@@ -4,7 +4,8 @@ from app.core.scanner.report import generate_report
 from app.core.github.comments import post_pr_comment
 from app.core.scanner.scanner import (
     clone_repository,
-    scan_repository
+    scan_repository,
+    cleanup_repository
 )
 from app.core.github.status_checks import (
     create_status_check
@@ -43,12 +44,13 @@ async def github_webhook(request: Request):
     print(f"Branch: {head_ref}")
     print(f"Head SHA: {head_sha}")
 
-    # Process only relevant PR events
     if action in ["opened", "synchronize", "reopened"]:
+
+        repo_path = None
 
         try:
 
-            # Set status to pending
+            # Status: Pending
             create_status_check(
                 repo_name=repo_name,
                 commit_sha=head_sha,
@@ -80,7 +82,7 @@ async def github_webhook(request: Request):
                 report=report
             )
 
-            # Update status based on findings
+            # Status: Success / Failure
             if findings:
 
                 create_status_check(
@@ -111,6 +113,11 @@ async def github_webhook(request: Request):
             )
 
             raise
+
+        finally:
+
+            if repo_path:
+                cleanup_repository(repo_path)
 
     print("=" * 50 + "\n")
 
