@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Request
 
+from app.core.scanner import findings
 from app.core.scanner.report import generate_report
 from app.core.github.comments import post_pr_comment
 from app.core.scanner.scanner import (
@@ -10,6 +11,7 @@ from app.core.scanner.scanner import (
 from app.core.github.status_checks import (
     create_status_check
 )
+from app.core.scanner.ai_fixes import generate_fix_suggestion
 
 router = APIRouter()
 
@@ -68,7 +70,11 @@ async def github_webhook(request: Request):
             print(f"Local Path: {repo_path}")
 
             findings = scan_repository(repo_path)
+            print("\nGenerating AI Fix Suggestions...\n")
 
+            for finding in findings:
+                finding.ai_fix = generate_fix_suggestion(finding)
+                
             report = generate_report(findings)
 
             print("\nScan Report:\n")

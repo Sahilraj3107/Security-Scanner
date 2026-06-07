@@ -22,6 +22,8 @@ def generate_report(findings):
             f"- File: `{finding.file}`\n"
             f"- Line: `{finding.line}`\n"
             f"- Message: {finding.message}\n\n"
+            f"- AI Fix Suggestion: {finding.ai_fix or 'N/A'}\n\n"
+            
         )
 
     return report
