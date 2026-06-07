@@ -28,7 +28,9 @@ def run_semgrep_scan(repo_path: str):
                 repo_path
             ],
             capture_output=True,
-            text=True
+            text=True,
+            encoding="utf-8",
+            errors="ignore"
         )
 
         data = json.loads(result.stdout)
