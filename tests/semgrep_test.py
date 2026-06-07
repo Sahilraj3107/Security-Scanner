@@ -1,34 +1,35 @@
+import hashlib
 import os
+import random
 import subprocess
-import pickle
+import yaml
 
 
-API_KEY = "sk_test_123456789abcdef"
-PASSWORD = "admin123"
+SECRET_KEY = "my_super_secret_key_123"
+AWS_SECRET = "AKIAIOSFODNN7EXAMPLE"
 
 
-def command_injection():
-    user_input = input("Enter command: ")
-    os.system(user_input)
+def weak_hash(password):
+    return hashlib.md5(password.encode()).hexdigest()
 
 
-def subprocess_injection():
-    command = input("Command: ")
-    subprocess.run(command, shell=True)
+def predictable_token():
+    return random.random()
 
 
-def insecure_deserialization():
-    data = input("Pickle data: ")
-    pickle.loads(data.encode())
+def command_execution():
+    cmd = input("Command: ")
+    subprocess.Popen(cmd, shell=True)
 
 
-def dangerous_eval():
-    user_code = input("Python code: ")
-    eval(user_code)
+def unsafe_yaml_load(data):
+    return yaml.load(data, Loader=yaml.Loader)
+
+
+def path_traversal(filename):
+    with open(f"uploads/{filename}", "r") as f:
+        return f.read()
 
 
 if __name__ == "__main__":
-    command_injection()
-    subprocess_injection()
-    insecure_deserialization()
-    dangerous_eval()
+    print(weak_hash("password123"))
