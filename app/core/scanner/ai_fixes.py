@@ -5,7 +5,9 @@ import google.generativeai as genai
 # client = OpenAI(
 #     api_key=os.getenv("OPENAI_API_KEY")
 # )
+from app.config import settings
 
+print("Gemini Key:", settings.gemini_api_key)
 genai.configure(
     api_key=os.getenv("GEMINI_API_KEY")
 )
