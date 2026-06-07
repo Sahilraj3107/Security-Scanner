@@ -7,6 +7,7 @@ from datetime import datetime
 
 from app.core.scanner.secrets import SECRET_PATTERNS
 from app.core.scanner.findings import Finding
+from app.core.scanner.semgrep_scanner import run_semgrep_scan
 
 
 def clone_repository(clone_url: str, branch_name: str):
@@ -38,7 +39,7 @@ def scan_repository(repo_path):
 
     print("\nScanning repository...\n")
 
-    findings = []
+    regex_findings = []
 
     skip_dirs = {
         ".git",
@@ -89,7 +90,7 @@ def scan_repository(repo_path):
                                 message=f"Hardcoded {secret_name} detected"
                             )
 
-                            findings.append(finding)
+                            regex_findings.append(finding)
 
                             print("\n[HIGH]")
                             print(f"File: {relative_path}")
@@ -103,10 +104,24 @@ def scan_repository(repo_path):
                     f"{relative_path}: {e}"
                 )
 
-    print("\nScan Complete")
-    print(f"Findings Found: {len(findings)}")
+    print("\nRegex Scan Complete")
+    print(f"Regex Findings Found: {len(regex_findings)}")
 
-    return findings
+    print("\nRunning Semgrep Scan...\n")
+
+    semgrep_findings = run_semgrep_scan(repo_path)
+
+    print(
+        f"Semgrep Findings Found: "
+        f"{len(semgrep_findings)}"
+    )
+
+    all_findings = regex_findings + semgrep_findings
+
+    print("\nScan Complete")
+    print(f"Total Findings Found: {len(all_findings)}")
+
+    return all_findings
 
 
 def cleanup_repository(repo_path):
