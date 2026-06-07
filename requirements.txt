@@ -6,3 +6,4 @@ redis
 rq
 PyGithub
 httpx
+google-generativeai
