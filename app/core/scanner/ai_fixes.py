@@ -6,10 +6,13 @@ import google.generativeai as genai
 #     api_key=os.getenv("OPENAI_API_KEY")
 # )
 from app.config import settings
-
-print("Gemini Key:", settings.gemini_api_key)
+print("Gemini Key Present:", bool(settings.gemini_api_key))
+print(
+    "Gemini Key Loaded:",
+    settings.gemini_api_key[:8] + "..."
+)
 genai.configure(
-    api_key=os.getenv("GEMINI_API_KEY")
+    api_key=settings.gemini_api_key
 )
 
 def build_prompt(finding):
