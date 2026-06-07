@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     github_private_key_path: str = ""
 
     redis_url: str = "redis://localhost:6379"
-
+    gemini_api_key: str
     class Config:
         env_file = ".env"
 
